@@ -5,7 +5,7 @@
 #include "iostream"
 #ifndef FILELOCKCPP_UI_H
 #define FILELOCKCPP_UI_H
-
+#include "colorCodes.h"
 
 class UI {
 public:
@@ -14,6 +14,7 @@ public:
     void display_set_user();
     void display_locked_files();
     void display_help();
+    void display_text_art();
 
 private:
     //Used to prin the art in the UI
@@ -24,11 +25,6 @@ private:
                           "██╔══╝  ██║██║     ██╔══╝  ██║     ██║  ██║██║  ██╗██╔═██╗ ██║  ██╗██╔═══╝ ██╔═══╝ \n"
                           "██║     ██║███████╗███████╗███████╗╚█████╔╝╚█████╔╝██║ ╚██╗╚█████╔╝██║     ██║     \n"
                           "╚═╝     ╚═╝╚══════╝╚══════╝╚══════╝ ╚════╝  ╚════╝ ╚═╝  ╚═╝ ╚════╝ ╚═╝     ╚═╝     ";
-    //quick function that prints art
-    void inline display_text_art()
-    {
-        std::cout << textArt << std::endl;
-    }
 };
 
 

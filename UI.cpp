@@ -32,9 +32,15 @@ void UI::display_ui()
             case '1': //Set User
             display_set_user();
             //Lock files since user may have changed
-                FS_UI.set_csv_files_readOnly(CSV_UI.locked_file_status(csv_path));
+            FS_UI.set_csv_files_readOnly(CSV_UI.locked_file_status(csv_path));
+            // Set files that need to be read only to writable
+            FS_UI.set_csv_files_writable(CSV_UI.unlocked_file_status(csv_path));
+            // Set files that need to be read only to read only
+            //setFileStatusReadOnly(CSV.locked_file_status(csv_path));
+            FS_UI.set_csv_files_readOnly(CSV_UI.locked_file_status(csv_path));
             //unlock the users files
-            CSV_UI.unlock_users_files(csv_path, "user_name");
+            CSV_UI.unlock_users_files(csv_path, INI_UI.get_ini_value("user_name"));
+
             // Clear console screen
             system("cls");
             display_home_menu(); //We should display the home menu after
@@ -44,7 +50,7 @@ void UI::display_ui()
                 system("cls");
                 //Print art
                 display_text_art();
-                std::cout <<std::endl<<"\nPress 'Q' to exit this menu\n" << std::endl;
+                std::cout <<std::endl<<"\nPress " <<ANSI_COLOR_RED<< "[Q] " <<ANSI_COLOR_RESET<< "to exit this menu\n" << std::endl;
                 //Display all the locked files
                 display_locked_files();
                 input = _getch(); //Listens for user key-click
@@ -62,9 +68,14 @@ void UI::display_ui()
                 system("cls");
                 // Print art
                 display_text_art();
-                std::cout << "[L] Lock a File\n"
-                          << "[U] Unlock a File\n"
-                          << "[Q] Exit this Menu\n";
+                std::cout << std::endl;
+                std::cout << "[L] " <<ANSI_COLOR_YELLOW<< "Lock a File\n"
+                          <<         ANSI_COLOR_RESET
+                          << "[U] " <<ANSI_COLOR_GREEN<< "Unlock a File\n"
+                          << ANSI_COLOR_RESET
+                          << "\n"
+                          << "[Q] " <<ANSI_COLOR_RED<< "Exit this Menu\n"
+                          << ANSI_COLOR_RESET;
                 while ((input != 'l') && (input !='u') && (input !='q')){ //waits until user inputs a correct key
                     input = _getch(); //Listens for user key-click
                 }
@@ -123,7 +134,7 @@ void UI::display_ui()
                 // Clear console screen
                 system("cls");
                 // Print art
-                std::cout << textArt << std::endl;
+                display_text_art();
                 std::cout << "Invalid input. Enter H for help.\n";
                 break;
         }
@@ -140,16 +151,18 @@ void UI::display_home_menu() {
     // Set console output encoding to UTF-8
     SetConsoleOutputCP(CP_UTF8);
     //Print initial interface
-    std::cout << textArt << std::endl;
+    display_text_art();
     //Print the current user from the ini file
     std::string current_user = INI_UI.get_ini_value("user_name");
-    std::cout << "Current User: "<<current_user<<"\n"<< std::endl;
+    std::cout << "Current User: "<<ANSI_COLOR_GREEN<<current_user<<ANSI_COLOR_RESET<<"\n"<< std::endl;
 
     std::cout << "[1] Set User\n"
               << "[2] Display Locked Files\n"
               << "[3] Lock/Unlock Files\n"
-              << "[H] Help\n"
-              << "[Q] Quit\n";
+              << "\n"
+              << "[H] " <<ANSI_COLOR_YELLOW<< "Help\n"
+              << ANSI_COLOR_RESET
+              << "[Q] " <<ANSI_COLOR_RED<< "Quit\n";
 }
 // Promts the user to set their username
 void UI::display_set_user() {
@@ -157,9 +170,9 @@ void UI::display_set_user() {
     // Clear console screen
     system("cls");
     // Print art
-    std::cout << textArt << std::endl;
-    //std::cout << textArt << std::endl;
-    std::cout << "Please enter your First and last Name:";
+    display_text_art();
+    std::cout << std::endl;
+    std::cout << "Please enter your " <<ANSI_COLOR_GREEN<< "First " <<ANSI_COLOR_RESET<< "and "<<ANSI_COLOR_GREEN<< "Last " <<ANSI_COLOR_RESET<< "name: ";
     std::getline(std::cin, user_name);
     INI_UI.write_user(user_name);
 }
@@ -173,7 +186,7 @@ void UI::display_locked_files()
 // Displays help menu
 void UI::display_help()
 {
-    std::cout << textArt << std::endl;
+    display_text_art();
     std::cout << "Help documentation:\n"
               << "1. Set User - sets the username.\n"
               << "\t - This will allow the program to unlock files\n"
@@ -189,4 +202,8 @@ void UI::display_help()
               << "\n"
               << "Q. Quit - Exits the program.\n"
               << "\t  - Will also exit other menus if not currently at the main menu.\n";
+}
+
+void UI::display_text_art() {
+    std::cout <<ANSI_COLOR_YELLOW<< textArt <<ANSI_COLOR_RESET<< std::endl;
 }

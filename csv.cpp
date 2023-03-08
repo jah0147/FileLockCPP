@@ -1,5 +1,4 @@
 #include "csv.h"
-#include <fstream>
 #include <string>
 #include <vector>
 #include "tuple"
@@ -8,7 +7,9 @@
 #include "filesystem"
 #include <ctime>
 #include <iomanip>
-#include <sstream>
+
+#include "colorCodes.h"
+ // for setw() and left
 //Our classes
 #include "file_status.h"
 namespace fs = std::filesystem;
@@ -249,17 +250,29 @@ void csv::print_locked_file_status()
     // Call the locked_file_status() function to get the locked filenames and filepaths
     auto [locked_filename, locked_filepath, checked_out_name] = csv::locked_file_status(csv_path);
 
-    auto zipped = std::make_tuple(locked_filename.begin(), checked_out_name.begin());
-    auto end = std::make_tuple(locked_filename.end(), checked_out_name.end());
+    // Print the header
+    std::cout <<ANSI_COLOR_YELLOW;
+    std::cout << "[Locked Filenames]";
+    std::cout <<ANSI_COLOR_RESET;
+    std::cout << "                                 ";
+    std::cout <<ANSI_COLOR_GREEN;
+    std::cout << "[Checked out by]" << std::endl;
+    std::cout <<ANSI_COLOR_RESET;
+    // Print the separator line
+    std::cout << std::string(67, '-') << std::endl;
 
-
-    //Comment or uncomment print loops as needed
-    // Print the contents of the locked_filename vector
-    std::cout << "Locked filenames                         Checked out by" << std::endl;
-
-    for (; zipped != end; std::advance(std::get<0>(zipped), 1), std::advance(std::get<1>(zipped), 1)) {
-        std::cout << "-  " << *std::get<0>(zipped);
-        std::cout << " ------------------------------ " << *std::get<1>(zipped) << std::endl;
+    // Loop over the locked filenames and print each filename and user
+    for (size_t i = 0; i < locked_filename.size(); ++i) {
+        std::cout << "- ";
+        std::cout <<ANSI_COLOR_YELLOW;
+        std::cout << locked_filename[i];
+        std::cout <<ANSI_COLOR_RESET;
+        std::cout << "  ";
+        std::cout << std::string(47 - locked_filename[i].length(), '-');
+        std::cout << "  ";
+        std::cout <<ANSI_COLOR_GREEN;
+        std::cout << checked_out_name[i] << std::endl;
+        std::cout <<ANSI_COLOR_RESET;
     }
 
 //    for (const auto& filename : locked_filename) {
