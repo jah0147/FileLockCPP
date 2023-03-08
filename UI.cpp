@@ -4,44 +4,189 @@
 #include <iostream>
 #include <string>
 #include <conio.h>
+#include "csv.h"
 #include "UI.h"
-#include "main.h"
+#include "ini.h"
+#include "file_status.h"
 
+ini INI_UI;
+csv CSV_UI;
+file_status FS_UI;
+
+std::string csv_path = INI_UI.get_ini_value("csv_path");
+// Main UI displaying function - Displays all UI based on cases
 void UI::display_ui()
 {
+    system("cls");
     char input;
     bool running = true;
+    display_home_menu();
 
     while (running) {
-        std::cout << "Enter a command: ";
+
+        //Set input to a key listener
         input = _getch();
         std::cout << input << "\n";
 
         switch (input) {
-            case '1':
-                //startFunction();
+            case '1': //Set User
+            display_set_user();
+            //Lock files since user may have changed
+                FS_UI.set_csv_files_readOnly(CSV_UI.locked_file_status(csv_path));
+            //unlock the users files
+            CSV_UI.unlock_users_files(csv_path, "user_name");
+            // Clear console screen
+            system("cls");
+            display_home_menu(); //We should display the home menu after
                 break;
-            case '2':
-                //stopFunction();
+            case '2': //Display a list of all locked files
+                // Clear console screen
+                system("cls");
+                //Print art
+                display_text_art();
+                std::cout <<std::endl<<"\nPress 'Q' to exit this menu\n" << std::endl;
+                //Display all the locked files
+                display_locked_files();
+                input = _getch(); //Listens for user key-click
+                //Waits until user exits
+                while (input != 'q'){
+                    input = _getch(); //Listens for user key-click
+                }
+                //clear screen
+                system("cls");
+                //display home menu
+                display_home_menu();
                 break;
-            case '3':
+            case '3': //Lock or unlock files
+                // Clear console screen
+                system("cls");
+                // Print art
+                display_text_art();
+                std::cout << "[L] Lock a File\n"
+                          << "[U] Unlock a File\n"
+                          << "[Q] Exit this Menu\n";
+                while ((input != 'l') && (input !='u') && (input !='q')){ //waits until user inputs a correct key
+                    input = _getch(); //Listens for user key-click
+                }
+                if (input == 'l')
+                {
+                    //Use lock file function
+                    //Let user select file
+                    //Get filepath of selected file
+                    //Check CSV for row of filepath
+                    //If file does not exist, notify user
+                    //If file exists, check if a user has file checked out
+                    //If yes,
+                    //If no, lock file
+                    //test
+                    std::string user_name = INI_UI.get_ini_value("user_name");
+                    std::string file = FS_UI.selectFile();
+                    bool is_owner = CSV_UI.is_user_owner(csv_path,
+                                                         file,
+                                                         user_name);
+                    if (is_owner) //No one has file locked or user already has file locked
+                    {
+                        CSV_UI.write_lock_data(csv_path,file,user_name); //Writes data to csv file
+                        //FS_UI.make_readonly(file); //Makes selected file read only (not needed as user owns file)
+                    } else // We cannot lock file for user
+                    {
+                        std::cout << "not owner";
+                    }
+                } else if (input == 'u')
+                {
+                    std::string user_name = INI_UI.get_ini_value("user_name");
+                    std::string file = FS_UI.selectFile();
+                    bool is_owner = CSV_UI.is_user_owner(csv_path,
+                                                         file,
+                                                         user_name);
+                    if (is_owner) //No one has file locked or user already has file locked
+                    {
+                        CSV_UI.clear_lock_data(csv_path,file); //Writes data to csv file
+                        //FS_UI.make_writable(file); //Makes selected file writable (not needed as user owns file)
+                    } else // We cannot lock file for user
+                    {
+                        std::cout << "not owner";
+                    }
+                }
+                //If user exits this menu
+                display_home_menu();
+                break;
+            case 'h': //Help
+                // Clear console screen
+                system("cls");
                 display_help();
                 break;
-            case '4':
+            case 'q':
                 running = false;
                 break;
             default:
-                std::cout << "Invalid input. Enter 3 for help.\n";
+                // Clear console screen
+                system("cls");
+                // Print art
+                std::cout << textArt << std::endl;
+                std::cout << "Invalid input. Enter H for help.\n";
                 break;
         }
     }
 }
+// Displays the home menu
+void UI::display_home_menu() {
+    system("cls");
+    // Set console window size
+    HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+    SMALL_RECT rect = {0, 0, 82, 22}; // 80 columns x 30 rows
+    SetConsoleWindowInfo(console, TRUE, &rect);
 
+    // Set console output encoding to UTF-8
+    SetConsoleOutputCP(CP_UTF8);
+    //Print initial interface
+    std::cout << textArt << std::endl;
+    //Print the current user from the ini file
+    std::string current_user = INI_UI.get_ini_value("user_name");
+    std::cout << "Current User: "<<current_user<<"\n"<< std::endl;
+
+    std::cout << "[1] Set User\n"
+              << "[2] Display Locked Files\n"
+              << "[3] Lock/Unlock Files\n"
+              << "[H] Help\n"
+              << "[Q] Quit\n";
+}
+// Promts the user to set their username
+void UI::display_set_user() {
+    std::string user_name;
+    // Clear console screen
+    system("cls");
+    // Print art
+    std::cout << textArt << std::endl;
+    //std::cout << textArt << std::endl;
+    std::cout << "Please enter your First and last Name:";
+    std::getline(std::cin, user_name);
+    INI_UI.write_user(user_name);
+}
+
+//Display locked files
+void UI::display_locked_files()
+{
+    CSV_UI.print_locked_file_status();
+}
+
+// Displays help menu
 void UI::display_help()
 {
+    std::cout << textArt << std::endl;
     std::cout << "Help documentation:\n"
-              << "1. Start - starts the program\n"
-              << "2. Stop - stops the program\n"
-              << "3. Help - displays this help documentation\n"
-              << "4. Quit - exits the program\n";
+              << "1. Set User - sets the username.\n"
+              << "\t - This will allow the program to unlock files\n"
+              << "\t   that belong to the set user.\n"
+              << "\n"
+              << "2. Display Locked Files - Displays all files that are locked.\n"
+              << "\t\t This also displays who has the file checked-out.\n"
+              << "\n"
+              << "3. Lock/Unlock Files - Allows a user to select a file via\n"
+              << "\t\t  the windows file explorer to lock or unlock.\n"
+              << "\n"
+              << "H. Help - displays this help documentation\n"
+              << "\n"
+              << "Q. Quit - Exits the program.\n"
+              << "\t  - Will also exit other menus if not currently at the main menu.\n";
 }

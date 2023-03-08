@@ -54,11 +54,38 @@ bool file_status::make_readonly(const std::string &filePath)
     return true;
 }
 //Function that sets a file to writable
-bool file_status::make_writable(const std::string &filePath) {
+bool file_status::make_writable(std::string &filePath) {
     DWORD fileAttributes = GetFileAttributes(filePath.c_str()); // Get the attributes of the selected file
     // File is read-only, so make it writable
     if (SetFileAttributes(filePath.c_str(), fileAttributes & ~FILE_ATTRIBUTE_READONLY) == FALSE) { // Clear the read-only attribute and check if the operation failed
         return false;
     }
     return true;
+}
+//Sets file status to read only based on CSV file
+void file_status::set_csv_files_readOnly(std::tuple<std::vector<std::string>, std::vector<std::string>, std::vector<std::string>> locked_file_status)
+{
+    // Call the locked_file_status() function to get the locked filenames and filepaths
+    auto [locked_filename, locked_filepath, checked_out_name] = locked_file_status;
+
+    bool setFileReadOnly = false;
+    for (const auto& filepath : locked_filepath) {
+        setFileReadOnly = make_readonly(filepath);
+        //std::cout << "Set " << filename << " to Read-Only" << std::endl;
+    }
+}
+
+//Sets a file to writable based on CSV file
+void file_status::set_csv_files_writable(std::pair<std::vector<std::string>, std::vector<std::string>> unlocked_file_status)
+{
+    // Call the locked_file_status() function to get the locked filenames and filepaths
+    std::pair<std::vector<std::string>, std::vector<std::string>> result = unlocked_file_status;
+    //locked_filenames = result.first; //use result.first for filename and result.second for path
+    std::vector<std::string> unlocked_filepath = result.second;
+
+    bool setFileWritable = false;
+    for (auto& filepath : unlocked_filepath) {
+        setFileWritable = make_writable(filepath);
+        //std::cout << "Set " << filename << " to Writable" << std::endl;
+    }
 }

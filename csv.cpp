@@ -4,8 +4,15 @@
 #include <vector>
 #include "tuple"
 #include <unordered_set>
+#include <iostream>
 #include "filesystem"
+#include <ctime>
+#include <iomanip>
+#include <sstream>
+//Our classes
+#include "file_status.h"
 namespace fs = std::filesystem;
+
 //Generates/Reads a CSV file based on a specified directory
 void csv::generate_file_list_csv(const fs::path& dir_path, const std::string& csv_filename) {
 // check if CSV file already exists
@@ -177,3 +184,320 @@ std::pair<std::vector<std::string>, std::vector<std::string>> csv::unlocked_file
     // Return a pair of vectors containing the unlocked filenames and filepaths
     return std::make_pair(unlocked_filename, unlocked_filepath);
 }
+
+void csv::unlock_users_files(const std::string& filename, const std::string& check_name)
+{
+    file_status FS_CSV; //Initialte file_status
+
+    std::string filepath_unlock = "";
+
+// Open the file for reading
+    std::ifstream file(filename);
+    if (!file) {
+        // If we couldn't open the file, print an error message and return
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        return;
+    }
+
+    // Declare variables to hold each line of the file, the headers, and a flag indicating if a match was found
+    std::string line;
+    std::vector<std::string> headers;
+    bool found_match = false;
+
+    // Read the file line by line
+    while (std::getline(file, line)) {
+        // Parse each line by splitting it into fields separated by commas
+        std::stringstream ss(line);
+        std::string field;
+
+        std::vector<std::string> fields;
+        while (std::getline(ss, field, ',')) {
+            fields.push_back(field);
+        }
+
+        // If we're still reading the header row, save the headers for reference
+        if (headers.empty()) {
+            headers = fields;
+        }
+        else {
+            //set names to all upper case for better comparison
+            // Check if the field in column 5 is not empty before converting it to uppercase
+            std::string column_name;
+            if (fields.size() > 4 && !fields[4].empty()) {
+                column_name = set_str_upper(fields[4]);
+            }
+            std::string check_name_up = set_str_upper(check_name);
+            // Check if the check_name matches the value in column 5 (which is index 4 since indices start at 0)
+            if (fields.size() > 4 && fields[4] == check_name) {
+                // If there's a match, save the value in column 2 (which is index 1) to the filepath_unlock variable
+                filepath_unlock = fields.size() > 1 ? fields[1] : "";
+                found_match = FS_CSV.make_writable(filepath_unlock);
+                break; // Stop reading the file since we found a match
+            }
+        }
+    }
+
+    // If no match was found, print a message indicating so
+//    if (!found_match) {
+//        std::cout << "No match found for check_name: " << check_name << std::endl;
+//    }
+}
+
+// Prints the locked files and the users who have them locked
+void csv::print_locked_file_status()
+{
+    // Call the locked_file_status() function to get the locked filenames and filepaths
+    auto [locked_filename, locked_filepath, checked_out_name] = csv::locked_file_status(csv_path);
+
+    auto zipped = std::make_tuple(locked_filename.begin(), checked_out_name.begin());
+    auto end = std::make_tuple(locked_filename.end(), checked_out_name.end());
+
+
+    //Comment or uncomment print loops as needed
+    // Print the contents of the locked_filename vector
+    std::cout << "Locked filenames                         Checked out by" << std::endl;
+
+    for (; zipped != end; std::advance(std::get<0>(zipped), 1), std::advance(std::get<1>(zipped), 1)) {
+        std::cout << "-  " << *std::get<0>(zipped);
+        std::cout << " ------------------------------ " << *std::get<1>(zipped) << std::endl;
+    }
+
+//    for (const auto& filename : locked_filename) {
+//        std::cout << "- " << filename;
+//        std::cout << "\t Checked-Out by: " << checked_out_name << std::endl;
+//    }
+    // Print the contents of the locked_filepath vector
+//    std::cout << "Locked filepaths:" << std::endl;
+//    for (const auto& filepath : locked_filepath) {
+//        std::cout << "- " << filepath << std::endl;
+//    }
+    // Print the contents of the checked_out_name vector
+//    std::cout << "Checked-out names:" << std::endl;
+//    for (const auto& name : checked_out_name) {
+//        std::cout << "- " << name << std::endl;
+//    }
+}
+
+//Check if user owns file
+bool csv::is_user_owner(std::string filepath, std::string file, std::string user)
+{
+    bool is_owner = true;
+
+    // Open the file for reading
+    std::ifstream input_file(filepath);
+    if (!input_file) {
+        // If we couldn't open the file, print an error message and return false
+        std::cerr << "Failed to open file: " << filepath << std::endl;
+        return false;
+    }
+
+    // Declare variables to hold each line of the file, the headers, and a flag indicating if a match was found
+    std::string line;
+    std::vector<std::string> headers;
+
+    // Read the file line by line
+    while (std::getline(input_file, line)) {
+        // Parse each line by splitting it into fields separated by commas
+        std::stringstream ss(line);
+        std::string field;
+
+        std::vector<std::string> fields;
+        while (std::getline(ss, field, ',')) {
+            fields.push_back(field);
+        }
+
+        // If we're still reading the header row, save the headers for reference
+        if (headers.empty()) {
+            headers = fields;
+        }
+        else {
+            // Check if the file matches the value in column 2 (which is index 1 since indices start at 0)
+            if (fields.size() > 1 && fields[1] == file) {
+                // Set names to all upper case for better comparison
+                std::string column_name;
+                if (fields.size() > 4 && !fields[4].empty()) {
+                    column_name = set_str_upper(fields[4]);
+                }
+                // Set names to all upper case for better comparison
+                std::string user_up;
+                user_up = set_str_upper(user);
+
+                // If there's a match, check if the 5th column (which is index 4) is empty
+                if (fields.size() > 4) {
+                    std::string column_5 = fields[4];
+                    if (column_5.empty() || column_5 == "") {
+                        is_owner = true; // If the 5th column is empty, set is_owner to true
+                    }
+                    else if (column_name == user_up) {
+                        is_owner = true; // If the 5th column contains the user, set is_owner to true
+                    }
+                    else {
+                        is_owner = false; // Otherwise, set is_owner to false
+                    }
+                    break; // Stop reading the file since we found a match
+                }
+            }
+        }
+    }
+
+    return is_owner;
+}
+
+// Write lock data to csv file
+void csv::write_lock_data(const std::string& filepath, const std::string& filename, const std::string& user_name) {
+    std::string line;
+    std::ifstream file(filepath);
+    if (!file) {
+        std::cerr << "Failed to open file: " << filepath << std::endl;
+        return;
+    }
+
+    std::vector<std::string> headers;
+    bool found_match = false;
+    std::vector<std::vector<std::string>> rows;
+
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        std::string field;
+
+        std::vector<std::string> fields;
+        while (std::getline(ss, field, ',')) {
+            fields.push_back(field);
+        }
+
+        if (headers.empty()) {
+            headers = fields;
+        }
+        else {
+            if (fields.size() > 1 && fields[1] == filename) {
+                fields.resize(headers.size(), ""); // make sure the row has the correct number of columns
+
+                if (fields.size() < 4) {
+                    fields.resize(4, "");
+                }
+                if (fields.size() < 5) {
+                    fields.resize(5, "");
+                }
+                if (fields.size() < 6) {
+                    fields.resize(6, "");
+                }
+
+                fields[3] = "Locked";
+                fields[4] = user_name;
+                std::time_t t = std::time(nullptr);
+                std::tm tm = *std::localtime(&t);
+                std::ostringstream oss;
+                oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
+                fields[5] = oss.str();
+                rows.push_back(fields);
+                found_match = true;
+            }
+            else {
+                rows.push_back(fields);
+            }
+        }
+    }
+
+    file.close();
+
+    if (!found_match) {
+        std::cout << "No match found for filename: " << filename << std::endl;
+        return;
+    }
+
+    std::ofstream output_file(filepath);
+    if (!output_file) {
+        std::cerr << "Failed to open file for writing: " << filepath << std::endl;
+        return;
+    }
+
+    output_file << headers[0];
+    for (int i = 1; i < headers.size(); i++) {
+        output_file << "," << headers[i];
+    }
+    output_file << std::endl;
+
+    for (int i = 0; i < rows.size(); i++) {
+        output_file << rows[i][0];
+        for (int j = 1; j < rows[i].size(); j++) {
+            output_file << "," << rows[i][j];
+        }
+        output_file << std::endl;
+    }
+
+    output_file.close();
+}
+
+// Clears lock data (i.e. user unlocks a file if it belongs to them. Use the is_user_owner func to check)
+void csv::clear_lock_data(const std::string& filepath, const std::string& filename) {
+    std::string line;
+    std::ifstream file(filepath);
+    if (!file) {
+        std::cerr << "Failed to open file: " << filepath << std::endl;
+        return;
+    }
+
+    std::vector<std::string> headers;
+    std::vector<std::vector<std::string>> rows;
+    bool found_match = false;
+
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        std::string field;
+
+        std::vector<std::string> fields;
+        while (std::getline(ss, field, ',')) {
+            fields.push_back(field);
+        }
+
+        if (headers.empty()) {
+            headers = fields;
+        }
+        else {
+            if (fields.size() > 1 && fields[1] == filename) {
+                if (fields.size() > 3) {
+                    fields[3].clear();
+                }
+                if (fields.size() > 4) {
+                    fields[4].clear();
+                }
+                if (fields.size() > 5) {
+                    fields[5].clear();
+                }
+                rows.push_back(fields);
+                found_match = true;
+            }
+            else {
+                rows.push_back(fields);
+            }
+        }
+    }
+
+    file.close();
+
+    if (!found_match) {
+        std::cout << "No match found for filename: " << filename << std::endl;
+        return;
+    }
+
+    std::ofstream output_file(filepath);
+    if (output_file.is_open()) {
+        output_file << headers[0];
+        for (int i = 1; i < headers.size(); i++) {
+            output_file << "," << headers[i];
+        }
+        output_file << std::endl;
+        for (const auto& row : rows) {
+            output_file << row[0];
+            for (int i = 1; i < row.size(); i++) {
+                output_file << "," << row[i];
+            }
+            output_file << std::endl;
+        }
+        output_file.close();
+    }
+    else {
+        std::cerr << "Failed to open file for writing: " << filepath << std::endl;
+    }
+}
+

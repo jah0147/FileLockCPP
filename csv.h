@@ -8,6 +8,8 @@
 #include <string>
 #include <filesystem>
 #include <list>
+#include <ctype.h>
+#include "ini.h"
 
 namespace fs = std::filesystem;
 
@@ -26,14 +28,35 @@ public:
  *
  * @param filename The filename/path of the CSV file.
  */
-    std::tuple<std::vector<std::string>, std::vector<std::string>, std::vector<std::string>> locked_file_status(const std::string& filename);
+    static std::tuple<std::vector<std::string>, std::vector<std::string>, std::vector<std::string>> locked_file_status(const std::string& filename);
 /**
  * @brief Generates vectors that store file information if they are listed as unlocked
  *
  * @param filename The filename/path of the CSV file.
  */
     std::pair<std::vector<std::string>, std::vector<std::string>> unlocked_file_status(const std::string& filename);
+    void unlock_users_files(const std::string& filename, const std::string& check_name);
+    void print_locked_file_status();
+
+    //Checks if the user is the ownder of the file
+    bool is_user_owner(std::string filepath, std::string file, std::string user);
+    //Writes lock data into csv file
+    void write_lock_data(const std::string& filepath, const std::string& filename, const std::string& user_name);
+    // Clears lock data (i.e. user unlocks a file if it belongs to them. Use the is_user_owner func to check)
+    void clear_lock_data(const std::string& filepath, const std::string& filename);
 private:
+    //Set Strings Upper Case
+    inline std::string set_str_upper(std::string string)
+    {
+        if (!string.empty()) {
+            for (char &c: string) {
+                c = toupper(c);
+            }
+        }
+        return string;
+    };
+    ini INI_CSV;
+    std::string csv_path = INI_CSV.get_csv_path();
 
 };
 

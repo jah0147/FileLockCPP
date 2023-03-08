@@ -18,9 +18,16 @@ public:
     fs::path get_project_directory();
     //Returns csv path from settings.ini file
     std::string get_csv_path();
+    //Write user to ini file
+    void write_user(std::string user_name);
+    //Gets user if available
+    std::string get_ini_value(std::string set_key);
+    //Clear a value in ini file
+    void clear_value(std::string key);
+
 private:
     // Specify the path to the settings.ini file
-    fs::path settings_path = "FileLockCPP_Settings.ini";
+    fs::path settings_path = "C:\\dev\\FileLockCPP\\FileLockCPP_Settings.ini";
 };
 
 

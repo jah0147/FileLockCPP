@@ -3,6 +3,8 @@
 
 #include <string>
 #include <Windows.h>
+#include <vector>
+#include <tuple>
 
 class file_status {
 public:
@@ -13,7 +15,12 @@ public:
     static bool toggle_file_status(const std::string& filePath);
 
     static bool make_readonly(const std::string& filePath);
-    static bool make_writable(const std::string& filePath);
+
+    bool make_writable(std::string& filePath);
+    //Sets file status to read only based on CSV file
+    void set_csv_files_readOnly(std::tuple<std::vector<std::string>, std::vector<std::string>, std::vector<std::string>> locked_file_status);
+    //Sets a file to writable based on CSV file
+    void set_csv_files_writable(std::pair<std::vector<std::string>, std::vector<std::string>> unlocked_file_status);
 };
 
 #endif // FILE_ATTRIBUTE_UTILS_H
