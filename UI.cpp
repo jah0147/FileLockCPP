@@ -14,6 +14,7 @@ csv CSV_UI;
 file_status FS_UI;
 
 std::string csv_path = INI_UI.get_ini_value("csv_path");
+std::string user_name = INI_UI.get_ini_value("user_name");
 // Main UI displaying function - Displays all UI based on cases
 void UI::display_ui()
 {
@@ -38,8 +39,9 @@ void UI::display_ui()
             // Set files that need to be read only to read only
             //setFileStatusReadOnly(CSV.locked_file_status(csv_path));
             FS_UI.set_csv_files_readOnly(CSV_UI.locked_file_status(csv_path));
+            user_name = INI_UI.get_ini_value("user_name");
             //unlock the users files
-            CSV_UI.unlock_users_files(csv_path, INI_UI.get_ini_value("user_name"));
+            CSV_UI.unlock_users_files(csv_path, user_name);
 
             // Clear console screen
             system("cls");

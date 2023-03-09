@@ -192,7 +192,7 @@ void csv::unlock_users_files(const std::string& filename, const std::string& che
 
     std::string filepath_unlock = "";
 
-// Open the file for reading
+    // Open the file for reading
     std::ifstream file(filename);
     if (!file) {
         // If we couldn't open the file, print an error message and return
@@ -221,19 +221,17 @@ void csv::unlock_users_files(const std::string& filename, const std::string& che
             headers = fields;
         }
         else {
-            //set names to all upper case for better comparison
-            // Check if the field in column 5 is not empty before converting it to uppercase
-            std::string column_name;
-            if (fields.size() > 4 && !fields[4].empty()) {
-                column_name = set_str_upper(fields[4]);
-            }
-            std::string check_name_up = set_str_upper(check_name);
-            // Check if the check_name matches the value in column 5 (which is index 4 since indices start at 0)
-            if (fields.size() > 4 && fields[4] == check_name) {
-                // If there's a match, save the value in column 2 (which is index 1) to the filepath_unlock variable
-                filepath_unlock = fields.size() > 1 ? fields[1] : "";
-                found_match = FS_CSV.make_writable(filepath_unlock);
-                break; // Stop reading the file since we found a match
+            // Check if the fields vector is large enough to access columns 4-6, and if any of these columns are empty
+            if (fields.size() > 3 && !fields[3].empty() && fields.size() > 4 && !fields[4].empty() && fields.size() > 5 && !fields[5].empty()) {
+                // Convert the value in column 5 to uppercase for better comparison
+                std::string column_name = set_str_upper(fields[4]);
+                std::string check_name_up = set_str_upper(check_name);
+                // Check if the check_name matches the value in column 5
+                if (column_name == check_name_up) {
+                    // If there's a match, save the value in column 2 to the filepath_unlock variable and make the file writable
+                    filepath_unlock = fields[1];
+                    FS_CSV.make_writable(filepath_unlock);
+                }
             }
         }
     }
