@@ -15,6 +15,7 @@ file_status FS_UI;
 
 std::string csv_path = INI_UI.get_ini_value("csv_path");
 std::string user_name = INI_UI.get_ini_value("user_name");
+
 // Main UI displaying function - Displays all UI based on cases
 void UI::display_ui()
 {
@@ -48,16 +49,33 @@ void UI::display_ui()
             display_home_menu(); //We should display the home menu after
                 break;
             case '2': //Display a list of all locked files
+            {
                 // Clear console screen
                 system("cls");
+                bool display_user_files = false; //flag to toggle between display_locked_files() and CSV_UI.print_usr_locked_file_status()
                 //Print art
                 display_text_art();
-                std::cout <<std::endl<<"\nPress " <<ANSI_COLOR_RED<< "[Q] " <<ANSI_COLOR_RESET<< "to exit this menu\n" << std::endl;
+                std::cout <<std::endl<<"\nPress " <<ANSI_COLOR_CYAN<< "[T] " <<ANSI_COLOR_RESET<< "to toggle between your locked and all locked files" << std::endl;
+                std::cout << "Press " <<ANSI_COLOR_RED<< "[Q] " <<ANSI_COLOR_RESET<< "to exit this menu\n" << std::endl;
                 //Display all the locked files
-                display_locked_files();
+                CSV_UI.print_locked_file_status();
+                stayAtTop();
                 input = _getch(); //Listens for user key-click
-                //Waits until user exits
-                while (input != 'q'){
+                while (input != 'q') {
+                    if (input == 't') {
+                        system("cls");
+                        display_text_art();
+                        std::cout <<std::endl<<"\nPress " <<ANSI_COLOR_CYAN<< "[T] " <<ANSI_COLOR_RESET<< "to toggle between your locked and all locked files" << std::endl;
+                        std::cout << "Press " <<ANSI_COLOR_RED<< "[Q] " <<ANSI_COLOR_RESET<< "to exit this menu\n" << std::endl;
+                        if (!display_user_files) {
+                            CSV_UI.print_usr_locked_file_status();
+                            stayAtTop();
+                        } else {
+                            CSV_UI.print_locked_file_status();
+                            stayAtTop();
+                        }
+                        display_user_files = !display_user_files; //toggle the flag
+                    }
                     input = _getch(); //Listens for user key-click
                 }
                 //clear screen
@@ -65,6 +83,7 @@ void UI::display_ui()
                 //display home menu
                 display_home_menu();
                 break;
+            }
             case '3': //Lock or unlock files
                 // Clear console screen
                 system("cls");
@@ -78,47 +97,49 @@ void UI::display_ui()
                           << "\n"
                           << "[Q] " <<ANSI_COLOR_RED<< "Exit this Menu\n"
                           << ANSI_COLOR_RESET;
-                while ((input != 'l') && (input !='u') && (input !='q')){ //waits until user inputs a correct key
+                while (input !='q'){ //waits until user inputs a correct key
                     input = _getch(); //Listens for user key-click
-                }
-                if (input == 'l')
-                {
-                    //Use lock file function
-                    //Let user select file
-                    //Get filepath of selected file
-                    //Check CSV for row of filepath
-                    //If file does not exist, notify user
-                    //If file exists, check if a user has file checked out
-                    //If yes,
-                    //If no, lock file
-                    //test
-                    std::string user_name = INI_UI.get_ini_value("user_name");
-                    std::string file = FS_UI.selectFile();
-                    bool is_owner = CSV_UI.is_user_owner(csv_path,
-                                                         file,
-                                                         user_name);
-                    if (is_owner) //No one has file locked or user already has file locked
+
+                    if (input == 'l')
                     {
-                        CSV_UI.write_lock_data(csv_path,file,user_name); //Writes data to csv file
-                        //FS_UI.make_readonly(file); //Makes selected file read only (not needed as user owns file)
-                    } else // We cannot lock file for user
-                    {
-                        std::cout << "not owner";
-                    }
-                } else if (input == 'u')
-                {
-                    std::string user_name = INI_UI.get_ini_value("user_name");
-                    std::string file = FS_UI.selectFile();
-                    bool is_owner = CSV_UI.is_user_owner(csv_path,
-                                                         file,
-                                                         user_name);
-                    if (is_owner) //No one has file locked or user already has file locked
-                    {
-                        CSV_UI.clear_lock_data(csv_path,file); //Writes data to csv file
-                        //FS_UI.make_writable(file); //Makes selected file writable (not needed as user owns file)
-                    } else // We cannot lock file for user
-                    {
-                        std::cout << "not owner";
+                        //Use lock file function
+                        //Let user select file
+                        //Get filepath of selected file
+                        //Check CSV for row of filepath
+                        //If file does not exist, notify user
+                        //If file exists, check if a user has file checked out
+                        //If yes,
+                        //If no, lock file
+                        //test
+                        std::string user_name = INI_UI.get_ini_value("user_name");
+                        std::string file = FS_UI.selectFile();
+                        bool is_owner = CSV_UI.is_user_owner(csv_path,
+                                                             file,
+                                                             user_name);
+                        if (is_owner) //No one has file locked or user already has file locked
+                        {
+                            CSV_UI.write_lock_data(csv_path,file,user_name); //Writes data to csv file
+                            //FS_UI.make_readonly(file); //Makes selected file read only (not needed as user owns file)
+                            //CSV_UI.commit_and_push_CSV(csv_path, user_name);
+                        } else // We cannot lock file for user
+                        {
+                            std::cout << "not owner";
+                        }
+                    } else if (input == 'u') {
+                        std::string user_name = INI_UI.get_ini_value("user_name");
+                        std::string file = FS_UI.selectFile();
+                        bool is_owner = CSV_UI.is_user_owner(csv_path,
+                                                             file,
+                                                             user_name);
+                        if (is_owner) //No one has file locked or user already has file locked
+                        {
+                            CSV_UI.clear_lock_data(csv_path, file); //Writes data to csv file
+                            //FS_UI.make_writable(file); //Makes selected file writable (not needed as user owns file)
+                            //CSV_UI.commit_and_push_CSV(csv_path, user_name);
+                        } else // We cannot lock file for user
+                        {
+                            std::cout << "not owner";
+                        }
                     }
                 }
                 //If user exits this menu
@@ -142,6 +163,7 @@ void UI::display_ui()
         }
     }
 }
+
 // Displays the home menu
 void UI::display_home_menu() {
     system("cls");
@@ -166,6 +188,7 @@ void UI::display_home_menu() {
               << ANSI_COLOR_RESET
               << "[Q] " <<ANSI_COLOR_RED<< "Quit\n";
 }
+
 // Promts the user to set their username
 void UI::display_set_user() {
     std::string user_name;
@@ -179,33 +202,43 @@ void UI::display_set_user() {
     INI_UI.write_user(user_name);
 }
 
-//Display locked files
-void UI::display_locked_files()
-{
-    CSV_UI.print_locked_file_status();
-}
-
 // Displays help menu
 void UI::display_help()
 {
     display_text_art();
     std::cout << "Help documentation:\n"
-              << "1. Set User - sets the username.\n"
+              << ANSI_COLOR_CYAN
+              << "[1]. "
+              << ANSI_COLOR_RESET
+              <<  "Set User - sets the username.\n"
               << "\t - This will allow the program to unlock files\n"
               << "\t   that belong to the set user.\n"
               << "\n"
-              << "2. Display Locked Files - Displays all files that are locked.\n"
+              << ANSI_COLOR_CYAN
+              << "[2]. "
+              << ANSI_COLOR_RESET
+              << "Display Locked Files - Displays all files that are locked.\n"
               << "\t\t This also displays who has the file checked-out.\n"
               << "\n"
-              << "3. Lock/Unlock Files - Allows a user to select a file via\n"
+              << ANSI_COLOR_CYAN
+              << "[3]. "
+              << ANSI_COLOR_RESET
+              << "Lock/Unlock Files - Allows a user to select a file via\n"
               << "\t\t  the windows file explorer to lock or unlock.\n"
               << "\n"
-              << "H. Help - displays this help documentation\n"
+              << ANSI_COLOR_CYAN
+              << "[H]. "
+              << ANSI_COLOR_RESET
+              << "Help - displays this help documentation\n"
               << "\n"
-              << "Q. Quit - Exits the program.\n"
+              << ANSI_COLOR_CYAN
+              << "[Q]. "
+              << ANSI_COLOR_RESET
+              << "Quit - Exits the program.\n"
               << "\t  - Will also exit other menus if not currently at the main menu.\n";
 }
 
+//Just displays the overall text art with set color
 void UI::display_text_art() {
     std::cout <<ANSI_COLOR_YELLOW<< textArt <<ANSI_COLOR_RESET<< std::endl;
 }

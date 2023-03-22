@@ -4,8 +4,11 @@
 #include "ini.h"
 #include "file_status.h"
 
+#define IDI_MYICON 101 //icon
+
 int main()
 {
+
 UI ui;
 csv CSV;
 ini INI;
@@ -17,6 +20,8 @@ std::string user_name = INI.get_ini_value("user_name");
 
 std::cout << "Generating CSV File. This could take some time..." << std::endl;
 CSV.generate_file_list_csv(dir_path, csv_path);
+
+CSV.remove_git_files_from_csv(csv_path); //Remove all git files
 
 // Check the file status
     //checkFileStatus(CSV.locked_file_status(csv_path));

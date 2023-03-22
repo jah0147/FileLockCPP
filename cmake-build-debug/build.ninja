@@ -51,31 +51,36 @@ build cmake_object_order_depends_target_FileLockCPP: phony || CMakeFiles/FileLoc
 
 build CMakeFiles/FileLockCPP.dir/main.cpp.obj: CXX_COMPILER__FileLockCPP_Debug C$:/Users/jacob_howard/CLionProjects/FileLockCPP/main.cpp || cmake_object_order_depends_target_FileLockCPP
   DEP_FILE = CMakeFiles\FileLockCPP.dir\main.cpp.obj.d
-  FLAGS = -g
+  FLAGS = -g -std=gnu++20
+  OBJECT_DIR = CMakeFiles\FileLockCPP.dir
+  OBJECT_FILE_DIR = CMakeFiles\FileLockCPP.dir
+
+build CMakeFiles/FileLockCPP.dir/resources.rc.obj: RC_COMPILER__FileLockCPP_Debug C$:/Users/jacob_howard/CLionProjects/FileLockCPP/resources.rc || cmake_object_order_depends_target_FileLockCPP
+  DEP_FILE = CMakeFiles\FileLockCPP.dir\resources.rc.obj.d
   OBJECT_DIR = CMakeFiles\FileLockCPP.dir
   OBJECT_FILE_DIR = CMakeFiles\FileLockCPP.dir
 
 build CMakeFiles/FileLockCPP.dir/file_status.cpp.obj: CXX_COMPILER__FileLockCPP_Debug C$:/Users/jacob_howard/CLionProjects/FileLockCPP/file_status.cpp || cmake_object_order_depends_target_FileLockCPP
   DEP_FILE = CMakeFiles\FileLockCPP.dir\file_status.cpp.obj.d
-  FLAGS = -g
+  FLAGS = -g -std=gnu++20
   OBJECT_DIR = CMakeFiles\FileLockCPP.dir
   OBJECT_FILE_DIR = CMakeFiles\FileLockCPP.dir
 
 build CMakeFiles/FileLockCPP.dir/csv.cpp.obj: CXX_COMPILER__FileLockCPP_Debug C$:/Users/jacob_howard/CLionProjects/FileLockCPP/csv.cpp || cmake_object_order_depends_target_FileLockCPP
   DEP_FILE = CMakeFiles\FileLockCPP.dir\csv.cpp.obj.d
-  FLAGS = -g
+  FLAGS = -g -std=gnu++20
   OBJECT_DIR = CMakeFiles\FileLockCPP.dir
   OBJECT_FILE_DIR = CMakeFiles\FileLockCPP.dir
 
 build CMakeFiles/FileLockCPP.dir/ini.cpp.obj: CXX_COMPILER__FileLockCPP_Debug C$:/Users/jacob_howard/CLionProjects/FileLockCPP/ini.cpp || cmake_object_order_depends_target_FileLockCPP
   DEP_FILE = CMakeFiles\FileLockCPP.dir\ini.cpp.obj.d
-  FLAGS = -g
+  FLAGS = -g -std=gnu++20
   OBJECT_DIR = CMakeFiles\FileLockCPP.dir
   OBJECT_FILE_DIR = CMakeFiles\FileLockCPP.dir
 
 build CMakeFiles/FileLockCPP.dir/UI.cpp.obj: CXX_COMPILER__FileLockCPP_Debug C$:/Users/jacob_howard/CLionProjects/FileLockCPP/UI.cpp || cmake_object_order_depends_target_FileLockCPP
   DEP_FILE = CMakeFiles\FileLockCPP.dir\UI.cpp.obj.d
-  FLAGS = -g
+  FLAGS = -g -std=gnu++20
   OBJECT_DIR = CMakeFiles\FileLockCPP.dir
   OBJECT_FILE_DIR = CMakeFiles\FileLockCPP.dir
 
@@ -87,7 +92,7 @@ build CMakeFiles/FileLockCPP.dir/UI.cpp.obj: CXX_COMPILER__FileLockCPP_Debug C$:
 #############################################
 # Link the executable FileLockCPP.exe
 
-build FileLockCPP.exe: CXX_EXECUTABLE_LINKER__FileLockCPP_Debug CMakeFiles/FileLockCPP.dir/main.cpp.obj CMakeFiles/FileLockCPP.dir/file_status.cpp.obj CMakeFiles/FileLockCPP.dir/csv.cpp.obj CMakeFiles/FileLockCPP.dir/ini.cpp.obj CMakeFiles/FileLockCPP.dir/UI.cpp.obj
+build FileLockCPP.exe: CXX_EXECUTABLE_LINKER__FileLockCPP_Debug CMakeFiles/FileLockCPP.dir/main.cpp.obj CMakeFiles/FileLockCPP.dir/resources.rc.obj CMakeFiles/FileLockCPP.dir/file_status.cpp.obj CMakeFiles/FileLockCPP.dir/csv.cpp.obj CMakeFiles/FileLockCPP.dir/ini.cpp.obj CMakeFiles/FileLockCPP.dir/UI.cpp.obj
   FLAGS = -g
   LINK_FLAGS = -static
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
